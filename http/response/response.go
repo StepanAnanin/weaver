@@ -112,12 +112,12 @@ func (res *response) NotFound(message string) error {
 
 // Sends response with status 408 and JSON {"message": <message>}
 func (res *response) RequestTimeout(message string) error {
-	return res.Message(message, http.StatusNotFound)
+	return res.Message(message, http.StatusRequestTimeout)
 }
 
 // Sends response with status 409 and JSON {"message": <message>}
 func (res *response) Conflict(message string) error {
-	return res.Message(message, http.StatusNotFound)
+	return res.Message(message, http.StatusConflict)
 }
 
 // Sends response with status 500 and JSON {"message": "Internal Server Error"}
