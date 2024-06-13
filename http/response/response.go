@@ -3,10 +3,7 @@ package response
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
-
-	"github.com/StepanAnanin/weaver/logger"
 )
 
 type response struct {
@@ -28,8 +25,6 @@ func (res *response) send(body []byte) error {
 	}
 
 	if _, writeError := res.writer.Write(body); writeError != nil {
-		log.Println("[ ERROR ] Failed to write in response body (status 500)")
-
 		return writeError
 	}
 
@@ -47,30 +42,11 @@ func (res *response) SendBody(body []byte) error {
 	return err
 }
 
-// Sends response with given message and status, also log request info in terminal.
-//
-// Returns error if failed to send response (also does log in this case), nil otherwise.
-func (res *response) SendError(message string, status int, req *http.Request) error {
-	err := res.Message(message, status)
-
-	if err != nil {
-		logger.PrintError("Failed to send response", http.StatusInternalServerError, req)
-
-		return err
-	}
-
-	logger.PrintError(message, status, req)
-
-	return nil
-}
-
 // Sends response with passed status and JSON {"message": <message>}
 func (res *response) Message(message string, status int) error {
 	body, err := json.Marshal(MessageResponseBody{Message: message})
 
 	if err != nil {
-		log.Println("[ ERROR ] Failed to marshal json.")
-
 		return err
 	}
 

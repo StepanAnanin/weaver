@@ -5,9 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	// "github.com/StepanAnanin/weaver/http/cors"
+	"github.com/StepanAnanin/weaver/http/cors"
 	"github.com/StepanAnanin/weaver/http/response"
-	"github.com/StepanAnanin/weaver/logger"
 )
 
 type request struct {
@@ -38,7 +37,7 @@ func (req *request) Preprocessing(methods []string) bool {
 	req.writer.Header().Set("Access-Control-Allow-Methods", strMethods)
 	req.writer.Header().Set("Access-Control-Allow-Headers",
 		"Accept, Date, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	// req.writer.Header().Set("Access-Control-Allow-Origin", cors.GetOrigin())
+	req.writer.Header().Set("Access-Control-Allow-Origin", cors.GetOrigin())
 
 	// TODO
 	// if origin := req.Header.Get("Origin"); origin != "" {
@@ -61,9 +60,7 @@ func (req *request) Preprocessing(methods []string) bool {
 	}
 
 	if allowed {
-		response.New(req.writer).SendError("Method Not Allowed. Allowed methods: "+strMethods, http.StatusMethodNotAllowed, req.origin)
-
-		logger.Print("Method not allowed", req.origin)
+		response.New(req.writer).Message("Method Not Allowed. Allowed methods: "+strMethods, http.StatusMethodNotAllowed)
 
 		return false
 	}
