@@ -22,8 +22,6 @@ func New(w http.ResponseWriter) *response {
 }
 
 // Writes given `body` in response. Returns nil if success, error otherwise.
-//
-// Also in error case sends error response with status 500. (Using `InternalServerError` method)
 func (res *response) writeBody(body []byte) error {
 	if res.isSent {
 		return errors.New("response was already sent")
@@ -32,12 +30,6 @@ func (res *response) writeBody(body []byte) error {
 	if _, writeError := res.writer.Write(body); writeError != nil {
 		log.Println("[ ERROR ] Failed to write in response body (status 500)")
 
-		err := res.InternalServerError()
-
-		if err != nil {
-			return err
-		}
-
 		return writeError
 	}
 
@@ -45,7 +37,6 @@ func (res *response) writeBody(body []byte) error {
 }
 
 // Sends response with status 200 and given `body`.
-// If error was return, that mean response has already been sent.
 func (res *response) Send(body []byte) error {
 	res.writer.WriteHeader(http.StatusOK)
 
@@ -73,45 +64,12 @@ func (res *response) SendError(message string, status int, req *http.Request) er
 	return nil
 }
 
-// Sends response with status 500 and JSON {"message": "Internal Server Error"}
-func (res *response) InternalServerError() error {
-	body, err := json.Marshal(MessageResponseBody{Message: "Internal Server Error"})
-
-	if err != nil {
-		log.Println("[ ERROR ] Failed to marshal json (status 500)")
-
-		return err
-	}
-
-	res.writer.WriteHeader(http.StatusInternalServerError)
-
-	// IMPORTANT
-	// Don't use `writeBody` here, it may cause infinite recursion.
-	// (cuz this method used inside `writeBody`)
-	if _, writeError := res.writer.Write(body); writeError != nil {
-		log.Println("[ ERROR ] Failed to write in response body (status 500)")
-
-		return writeError
-	}
-
-	res.isSent = true
-
-	return nil
-}
-
 // Sends response with passed status and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) Message(message string, status int) error {
 	body, err := json.Marshal(MessageResponseBody{Message: message})
 
-	// TODO duplicates, move to a new function
 	if err != nil {
 		log.Println("[ ERROR ] Failed to marshal json.")
-
-		if e := res.InternalServerError(); e != nil {
-			panic(e)
-		}
 
 		return err
 	}
@@ -128,50 +86,41 @@ func (res *response) Message(message string, status int) error {
 }
 
 // Sends response with status 200 and JSON {"message": "OK"}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) OK() error {
 	return res.Message("OK", http.StatusOK)
 }
 
 // Sends response with status 400 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) BadRequest(message string) error {
 	return res.Message(message, http.StatusBadRequest)
 }
 
 // Sends response with status 401 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) Unauthorized(message string) error {
 	return res.Message(message, http.StatusUnauthorized)
 }
 
 // Sends response with status 403 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) Forbidden(message string) error {
 	return res.Message(message, http.StatusForbidden)
 }
 
 // Sends response with status 404 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) NotFound(message string) error {
 	return res.Message(message, http.StatusNotFound)
 }
 
 // Sends response with status 408 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) RequestTimeout(message string) error {
 	return res.Message(message, http.StatusNotFound)
 }
 
 // Sends response with status 409 and JSON {"message": <message>}
-//
-// Also handles all possible errors, if one was return, that mean response has already been sent.
 func (res *response) Conflict(message string) error {
 	return res.Message(message, http.StatusNotFound)
+}
+
+// Sends response with status 500 and JSON {"message": "Internal Server Error"}
+func (res *response) InternalServerError() error {
+	return res.Message("Internal Server Error", http.StatusInternalServerError)
 }
