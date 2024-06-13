@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/StepanAnanin/weaver/config"
 	"github.com/StepanAnanin/weaver/http/cors"
 	"github.com/StepanAnanin/weaver/http/response"
 )
@@ -44,7 +45,9 @@ func (req *request) Preprocessing(methods []string) bool {
 	// 	req.writer.Header().Set("Access-Control-Allow-Origin", origin)
 	// }
 
-	log.Printf("[ %s ] %s %s", req.origin.RemoteAddr, req.origin.Method, req.origin.RequestURI)
+	if config.Settings.LogIncomingRequests {
+		log.Printf("[ %s ] %s %s", req.origin.RemoteAddr, req.origin.Method, req.origin.RequestURI)
+	}
 
 	if req.origin.Method == "OPTIONS" {
 		return false
