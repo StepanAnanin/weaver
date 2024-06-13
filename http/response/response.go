@@ -21,8 +21,8 @@ func New(w http.ResponseWriter) *response {
 	}
 }
 
-// Writes given `body` in response. Returns nil if success, error otherwise.
-func (res *response) writeBody(body []byte) error {
+// Writes given `body` in response and sends it.
+func (res *response) send(body []byte) error {
 	if res.isSent {
 		return errors.New("response was already sent")
 	}
@@ -37,10 +37,10 @@ func (res *response) writeBody(body []byte) error {
 }
 
 // Sends response with status 200 and given `body`.
-func (res *response) Send(body []byte) error {
+func (res *response) SendBody(body []byte) error {
 	res.writer.WriteHeader(http.StatusOK)
 
-	err := res.writeBody(body)
+	err := res.send(body)
 
 	res.isSent = true
 
@@ -76,7 +76,7 @@ func (res *response) Message(message string, status int) error {
 
 	res.writer.WriteHeader(status)
 
-	if err := res.writeBody(body); err != nil {
+	if err := res.send(body); err != nil {
 		return err
 	}
 
