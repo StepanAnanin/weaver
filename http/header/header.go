@@ -39,7 +39,7 @@ func (h *HttpHeader[V]) String() string {
 	case bool, int, string, float32, float64:
 		return out.(string)
 	default:
-		panic("Invalid CORS header value")
+		panic("Invalid header value")
 	}
 }
 
