@@ -36,6 +36,10 @@ func (h *header[T]) String() string {
 	}
 }
 
+func (h *header[T]) Apply(writer http.ResponseWriter) {
+	writer.Header().Set(h.name, h.String())
+}
+
 type headers struct {
 	// Access-Control-Allow-Credentials header, default value:
 	// true
@@ -52,10 +56,10 @@ type headers struct {
 }
 
 func (headers *headers) Apply(writer http.ResponseWriter) {
-	writer.Header().Set(headers.AllowCreditinals.Name(), headers.AllowCreditinals.String())
-	writer.Header().Set(headers.AllowMethods.Name(), headers.AllowMethods.String())
-	writer.Header().Set(headers.AllowHeaders.Name(), headers.AllowHeaders.String())
-	writer.Header().Set(headers.AllowOrigin.Name(), headers.AllowOrigin.String())
+	headers.AllowCreditinals.Apply(writer)
+	headers.AllowMethods.Apply(writer)
+	headers.AllowHeaders.Apply(writer)
+	headers.AllowOrigin.Apply(writer)
 }
 
 var Headers *headers = &headers{
