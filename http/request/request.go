@@ -3,7 +3,6 @@ package request
 import (
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/StepanAnanin/weaver/config"
 	"github.com/StepanAnanin/weaver/http/cors"
@@ -26,31 +25,26 @@ func (req *request) SetContentType(contentType string) {
 	req.writer.Header().Set("Content-Type", contentType)
 }
 
-// Return true if method supported, false otherwise
-// (Except OPTIONS, for this method always will be returned false)
+// Returns given handler if everything OK, otherwise returns empty http.HandlerFunc,
+// it's not nil, just does nothing (cuz if don't give it a value app will panic due to nil pointer)
 //
-// If method isn't supported sends error response (status 405)
-func (req *request) Preprocessing(methods []string) bool {
-	strMethods := strings.Join(methods, ", ")
+// # For request with OPTIONS method always will be returned empty http.HandlerFunc
+//
+// # For request with not allowed method sends error (status 405 and body with error message and list of allowed methods)
+func (req *request) Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc {
+	// Don't use empty "invalidOut" or you'll get nil pointer error
+	var invalidOut http.HandlerFunc = func(w http.ResponseWriter, req *http.Request) {}
 
-	req.writer.Header().Set("Content-Type", "application/json")
-	req.writer.Header().Set("Access-Control-Allow-Credentials", "true")
-	req.writer.Header().Set("Access-Control-Allow-Methods", strMethods)
-	req.writer.Header().Set("Access-Control-Allow-Headers",
-		"Accept, Date, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	req.writer.Header().Set("Access-Control-Allow-Origin", cors.GetOrigin())
+	cors.Headers.AllowMethods.Set(methods)
 
-	// TODO
-	// if origin := req.Header.Get("Origin"); origin != "" {
-	// 	req.writer.Header().Set("Access-Control-Allow-Origin", origin)
-	// }
+	cors.Headers.Apply(req.writer)
 
 	if config.Settings.LogIncomingRequests {
 		log.Printf("[ %s ] %s %s", req.origin.RemoteAddr, req.origin.Method, req.origin.RequestURI)
 	}
 
 	if req.origin.Method == "OPTIONS" {
-		return false
+		return invalidOut
 	}
 
 	allowed := false
@@ -63,10 +57,10 @@ func (req *request) Preprocessing(methods []string) bool {
 	}
 
 	if allowed {
-		response.New(req.writer).Message("Method Not Allowed. Allowed methods: "+strMethods, http.StatusMethodNotAllowed)
+		response.New(req.writer).Message("Method Not Allowed. Allowed methods: "+cors.Headers.AllowMethods.String(), http.StatusMethodNotAllowed)
 
-		return false
+		return invalidOut
 	}
 
-	return true
+	return handler
 }
