@@ -10,17 +10,21 @@ import (
 	"github.com/StepanAnanin/weaver/http/response"
 )
 
-// it's not nil, just does nothing (cuz if don't give it a value app will panic due to nil pointer)
-// Returns given handler if everything OK, otherwise returns empty http.HandlerFunc,
+// Accepts endpoint `handler` and array of allowed `methods`.
+// Returns handle function wich does request preprocessing, if preprocessing successful then calls given `handler`.
 //
-// # Also applies CORS headers
+// # If methods array is empty, then will be used default value for Access-Control-Allow-Methods header (default value is "GET").
 //
-// # For request with OPTIONS method always will be returned empty http.HandlerFunc
+// # Also applies cors headers to the response.
 //
-// # For request with not allowed method sends error (status 405 and body with error message and list of allowed methods)
+// # If method isn't suppored sends response with error message and list of allowed methods for this endpoint (status 405).
+//
+// # If request logs enabled, then also print some request info in terminal (requester ip, method and requested URI)
 func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		cors.Headers.AllowMethods.Set(methods)
+		if len(methods) > 0 {
+			cors.Headers.AllowMethods.Set(methods)
+		}
 
 		cors.Headers.Apply(w)
 

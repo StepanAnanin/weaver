@@ -11,7 +11,7 @@ type corsHeaders struct {
 	// Access-Control-Allow-Credentials header, default value:
 	// true
 	AllowCreditinals *header.HttpHeader[bool]
-	// Access-Control-Allow-AllowMethods header, default value:
+	// Access-Control-Allow-Methods header, default value:
 	// ["GET"]
 	AllowMethods *header.HttpHeader[[]string]
 	// Access-Control-Allow-Headers header, default value:
