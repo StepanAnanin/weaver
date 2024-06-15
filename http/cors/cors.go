@@ -7,7 +7,7 @@ import (
 	"github.com/StepanAnanin/weaver/http/header"
 )
 
-type corsHeaders struct {
+type headers struct {
 	// Access-Control-Allow-Credentials header, default value:
 	// true
 	AllowCreditinals *header.HttpHeader[bool]
@@ -22,24 +22,26 @@ type corsHeaders struct {
 	AllowOrigin *header.HttpHeader[string]
 }
 
-func (headers *corsHeaders) Apply(writer http.ResponseWriter) {
-	headers.AllowCreditinals.Apply(writer)
-	headers.AllowMethods.Apply(writer)
-	headers.AllowHeaders.Apply(writer)
-	headers.AllowOrigin.Apply(writer)
+func New() *headers {
+	return &headers{
+		AllowCreditinals: header.New("Access-Control-Allow-Credentials", true),
+		AllowOrigin:      header.New("Access-Control-Allow-Origin", "*"),
+		AllowMethods:     header.New("Access-Control-Allow-Methods", []string{"GET"}),
+		AllowHeaders: header.New("Access-Control-Allow-Headers", []string{
+			"Accept",
+			"Date",
+			"Content-Type",
+			"Content-Length",
+			"Accept-Encoding",
+			"X-CSRF-Token",
+			"Authorization",
+		}),
+	}
 }
 
-var Headers *corsHeaders = &corsHeaders{
-	AllowCreditinals: header.New("Access-Control-Allow-Credentials", true),
-	AllowOrigin:      header.New("Access-Control-Allow-Origin", "*"),
-	AllowMethods:     header.New("Access-Control-Allow-Methods", []string{"GET"}),
-	AllowHeaders: header.New("Access-Control-Allow-Headers", []string{
-		"Accept",
-		"Date",
-		"Content-Type",
-		"Content-Length",
-		"Accept-Encoding",
-		"X-CSRF-Token",
-		"Authorization",
-	}),
+func (h *headers) Apply(writer http.ResponseWriter) {
+	h.AllowCreditinals.Apply(writer)
+	h.AllowMethods.Apply(writer)
+	h.AllowHeaders.Apply(writer)
+	h.AllowOrigin.Apply(writer)
 }

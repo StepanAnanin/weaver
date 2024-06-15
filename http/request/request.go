@@ -22,11 +22,13 @@ import (
 // # If request logs enabled, then also print some request info in terminal (requester ip, method and requested URI)
 func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		corsHeaders := cors.New()
+
 		if len(methods) > 0 {
-			cors.Headers.AllowMethods.Set(methods)
+			corsHeaders.AllowMethods.Set(methods)
 		}
 
-		cors.Headers.Apply(w)
+		corsHeaders.Apply(w)
 
 		if config.Settings.LogIncomingRequests {
 			log.Printf("[ %s ] %s %s", req.RemoteAddr, req.Method, req.RequestURI)
@@ -37,7 +39,7 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 		}
 
 		if !slices.Contains(methods, req.Method) {
-			response.New(w).Message("Method Not Allowed. Allowed methods: "+cors.Headers.AllowMethods.String(), http.StatusMethodNotAllowed)
+			response.New(w).Message("Method Not Allowed. Allowed methods: "+corsHeaders.AllowMethods.String(), http.StatusMethodNotAllowed)
 
 			return
 		}
