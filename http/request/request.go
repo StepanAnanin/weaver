@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/StepanAnanin/weaver/config"
+	"github.com/StepanAnanin/weaver"
 	"github.com/StepanAnanin/weaver/http/cors"
 	"github.com/StepanAnanin/weaver/http/response"
 )
@@ -30,7 +30,7 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 
 		corsHeaders.Apply(w)
 
-		if config.Settings.LogIncomingRequests {
+		if weaver.Settings.LogIncomingRequests {
 			log.Printf("[ %s ] %s %s", req.RemoteAddr, req.Method, req.RequestURI)
 		}
 

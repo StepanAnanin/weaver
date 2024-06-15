@@ -4,6 +4,7 @@ package cors
 import (
 	"net/http"
 
+	"github.com/StepanAnanin/weaver"
 	"github.com/StepanAnanin/weaver/http/header"
 )
 
@@ -17,7 +18,7 @@ type headers struct {
 	// Access-Control-Allow-Headers header, default value:
 	// ["Accept", "Date", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"]
 	AllowHeaders *header.HttpHeader[[]string]
-	// Access-Control-Allow-AllowOrigin header, default value:
+	// Access-Control-Allow-Origin header, default value:
 	// "*"
 	AllowOrigin *header.HttpHeader[string]
 }
@@ -25,7 +26,7 @@ type headers struct {
 func New() *headers {
 	return &headers{
 		AllowCreditinals: header.New("Access-Control-Allow-Credentials", true),
-		AllowOrigin:      header.New("Access-Control-Allow-Origin", "*"),
+		AllowOrigin:      header.New("Access-Control-Allow-Origin", weaver.Settings.AccessControlAllowOrigin),
 		AllowMethods:     header.New("Access-Control-Allow-Methods", []string{"GET"}),
 		AllowHeaders: header.New("Access-Control-Allow-Headers", []string{
 			"Accept",
