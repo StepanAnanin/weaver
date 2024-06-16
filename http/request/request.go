@@ -22,6 +22,20 @@ import (
 // # If request logs enabled, then also print some request info in terminal (requester ip, method and requested URI)
 func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		if weaver.Settings.LogIncomingRequests {
+			log.Printf("[ %s ] %s %s", req.RemoteAddr, req.Method, req.RequestURI)
+		}
+
+		if weaver.Settings.DisableCORS {
+			if req.Method == "OPTIONS" && !weaver.Settings.PassOptionsRequestsOnPreprocessing {
+				return
+			}
+
+			handler(w, req)
+
+			return
+		}
+
 		corsHeaders := cors.New()
 
 		if len(methods) > 0 {
@@ -30,11 +44,7 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 
 		corsHeaders.Apply(w)
 
-		if weaver.Settings.LogIncomingRequests {
-			log.Printf("[ %s ] %s %s", req.RemoteAddr, req.Method, req.RequestURI)
-		}
-
-		if req.Method == "OPTIONS" {
+		if req.Method == "OPTIONS" && !weaver.Settings.PassOptionsRequestsOnPreprocessing {
 			return
 		}
 
@@ -44,6 +54,5 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 			return
 		}
 
-		handler(w, req)
 	}
 }
