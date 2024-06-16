@@ -13,9 +13,11 @@ import (
 // Accepts endpoint `handler` and array of allowed `methods`.
 // Returns handle function wich does request preprocessing, if preprocessing successful then calls given `handler`.
 //
-// # If methods array is empty, then will be used default value for Access-Control-Allow-Methods header (default value is "GET").
-//
 // # Also applies cors headers to the response.
+//
+// # OPTIONS requests won't pass preprocessing (can be disabled by setting `weaver.settings.PassOptionsRequestsOnPreprocessing` to true)
+//
+// # If methods array is empty, then will be used default value for Access-Control-Allow-Methods header (default value is "GET").
 //
 // # If method isn't suppored sends response with error message and list of allowed methods for this endpoint (status 405).
 //
