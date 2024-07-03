@@ -2,6 +2,7 @@ package header
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -33,11 +34,17 @@ func (h *HttpHeader[V]) Set(newValue V) {
 func (h *HttpHeader[V]) String() string {
 	out := any(h.value)
 
-	switch out.(type) {
+	switch v := out.(type) {
+	case string:
+		return v
 	case []string:
-		return strings.Join(out.([]string), ", ")
-	case bool, int, string, float32, float64:
-		return out.(string)
+		return strings.Join(v, ", ")
+	case bool:
+		return strconv.FormatBool(v)
+	case int, int64:
+		return strconv.FormatInt(out.(int64), 10)
+	case float32, float64:
+		return strconv.FormatFloat(out.(float64), 'f', -1, 64)
 	default:
 		panic("Invalid header value")
 	}
