@@ -56,5 +56,6 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 			return
 		}
 
+		handler(w, req)
 	}
 }
