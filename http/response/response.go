@@ -4,17 +4,24 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/StepanAnanin/weaver/logger"
 )
 
 type response struct {
 	writer http.ResponseWriter
 	isSent bool
+	logged bool
+	// Request corresponding to this response (nil by default)
+	req *http.Request
 }
 
 func New(w http.ResponseWriter) *response {
 	return &response{
 		writer: w,
 		isSent: false,
+		logged: false,
+		req:    nil,
 	}
 }
 
@@ -58,7 +65,19 @@ func (res *response) Message(message string, status int) error {
 
 	res.isSent = true
 
+	if res.logged && res.req != nil {
+		logger.Print(message, res.req)
+	}
+
 	return nil
+}
+
+// If this method was called, then on sending response also will be done log in terminal (similar to "logger.Print")
+func (res *response) Logged(req *http.Request) *response {
+	res.logged = true
+	res.req = req
+
+	return res
 }
 
 // Sends response with status 200 and JSON {"message": "OK"}
