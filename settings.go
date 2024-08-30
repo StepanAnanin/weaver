@@ -7,9 +7,9 @@ type settings struct {
 	// If true, then CORS headers won't be apply on preprocessing (request.Preprocessing).
 	// By default - false.
 	DisableCORS bool
-	// Access-Control-Allow-Origin header value.
+	// Default value of Access-Control-Allow-Origin header.
 	// By default - "*".
-	AccessControlAllowOrigin string
+	DefaultOrigin string
 	// If true, then OPTIONS requests won't be canceled on preprocessing (request.Preprocessing).
 	// By default - false.
 	//
@@ -21,6 +21,6 @@ type settings struct {
 var Settings *settings = &settings{
 	LogIncomingRequests:                true,
 	DisableCORS:                        false,
-	AccessControlAllowOrigin:           "*",
+	DefaultOrigin:                      "*",
 	PassOptionsRequestsOnPreprocessing: false,
 }

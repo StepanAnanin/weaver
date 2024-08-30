@@ -1,4 +1,4 @@
-package header
+package weaver
 
 import (
 	"net/http"
@@ -15,7 +15,7 @@ type HttpHeader[V httpHeaderValue] struct {
 	value V
 }
 
-func New[V httpHeaderValue](name string, value V) *HttpHeader[V] {
+func NewHttpHeader[V httpHeaderValue](name string, value V) *HttpHeader[V] {
 	return &HttpHeader[V]{name, value}
 }
 
@@ -50,6 +50,7 @@ func (h *HttpHeader[V]) String() string {
 	}
 }
 
+// Applies this HTTP header to the given writer.
 func (h *HttpHeader[V]) Apply(writer http.ResponseWriter) {
 	writer.Header().Set(h.name, h.String())
 }

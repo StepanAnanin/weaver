@@ -1,16 +1,12 @@
-package request
+package weaver
 
 import (
 	"log"
 	"net/http"
 	"slices"
-
-	"github.com/StepanAnanin/weaver"
-	"github.com/StepanAnanin/weaver/http/cors"
-	"github.com/StepanAnanin/weaver/http/response"
 )
 
-// Accepts endpoint `handler` and array of allowed `methods`.
+// Accepts endpoint `handler` and allowed `methods`.
 // Returns handle function wich does request preprocessing, if preprocessing successful then calls given `handler`.
 //
 // # Also applies cors headers to the response.
@@ -22,14 +18,14 @@ import (
 // # If method isn't suppored sends response with error message and list of allowed methods for this endpoint (status 405).
 //
 // # If request logs enabled, then also print some request info in terminal (requester ip, method and requested URI)
-func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc {
+func Preprocessing(handler http.HandlerFunc, methods ...string) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if weaver.Settings.LogIncomingRequests {
+		if Settings.LogIncomingRequests {
 			log.Printf("[ %s ] %s %s", req.RemoteAddr, req.Method, req.RequestURI)
 		}
 
-		if weaver.Settings.DisableCORS {
-			if req.Method == "OPTIONS" && !weaver.Settings.PassOptionsRequestsOnPreprocessing {
+		if Settings.DisableCORS {
+			if req.Method == "OPTIONS" && !Settings.PassOptionsRequestsOnPreprocessing {
 				return
 			}
 
@@ -38,7 +34,7 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 			return
 		}
 
-		corsHeaders := cors.New()
+		corsHeaders := InitCORS()
 
 		if len(methods) > 0 {
 			corsHeaders.AllowMethods.Set(methods)
@@ -46,12 +42,12 @@ func Preprocessing(handler http.HandlerFunc, methods []string) http.HandlerFunc 
 
 		corsHeaders.Apply(w)
 
-		if req.Method == "OPTIONS" && !weaver.Settings.PassOptionsRequestsOnPreprocessing {
+		if req.Method == "OPTIONS" && !Settings.PassOptionsRequestsOnPreprocessing {
 			return
 		}
 
 		if !slices.Contains(methods, req.Method) {
-			response.New(w).Message("Method Not Allowed. Allowed methods: "+corsHeaders.AllowMethods.String(), http.StatusMethodNotAllowed)
+			NewResponse(w).Message("Method Not Allowed. Allowed methods: "+corsHeaders.AllowMethods.String(), http.StatusMethodNotAllowed)
 
 			return
 		}
