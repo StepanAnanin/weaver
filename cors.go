@@ -38,6 +38,10 @@ func InitCORS() *corsHeaders {
 			"Accept-Encoding",
 			"X-CSRF-Token",
 			"Authorization",
+			"Access-Control-Allow-Credentials",
+			"Access-Control-Allow-Methods",
+			"Access-Control-Allow-Headers",
+			"Access-Control-Allow-Origin",
 		}),
 	}
 }
