@@ -16,7 +16,7 @@ func GetQueryParams(url *url.URL, paramsKeys ...string) ([]string, error) {
 		if param != "" {
 			res = append(res, param)
 		} else {
-			misses = append(misses, param)
+			misses = append(misses, key)
 		}
 	}
 
